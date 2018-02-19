@@ -2,6 +2,10 @@
 
 A REST API to control the TP-Link Smart bulbs that also includes a web interface.
 
+Here is a screen shot of the web interface, It doesn't look great but it works :)
+
+![screenshot](screenshot.png)
+
 Uses Konsumer's [tplink-lightbulb API](https://github.com/konsumer/tplink-lightbulb)
 
 The color picker on the interface was taken from [w3schools](https://www.w3schools.com/colors/colors_picker.asp)
