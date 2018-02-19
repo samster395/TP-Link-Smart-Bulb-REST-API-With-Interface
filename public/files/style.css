@@ -1,0 +1,68 @@
+html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
+body {background-color: #2c3e50; color: white;}
+h1{font-size:36px}h2{font-size:30px}h3{font-size:24px}h4{font-size:20px}h5{font-size:18px}h6{font-size:16px}.w3-serif{font-family:serif}
+h1,h2,h3,h4,h5,h6{font-family:"Segoe UI",Arial,sans-serif;font-weight:400;margin:10px 0}.w3-wide{letter-spacing:4px}
+
+pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: #fff700; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
+
+#response{
+    background-color: #737575;
+}
+
+#responsediv{
+    display: none;
+}
+
+#selectedcolor {
+    border:1px solid #e3e3e3;
+    width:10%;
+    height:100px;
+    margin:auto;
+}
+#divpreview {
+    border:1px solid #e3e3e3;
+    width:80px;
+    height:20px;
+    margin:auto;
+    visibility:hidden;
+}
+.colorTable, #colorhexDIV, #colorrgbDIV, #colorhslDIV, #colornamDIV {
+    font-family:Consolas, 'Courier New', Courier, monospace;
+}
+#colorhexDIV, #colorrgbDIV, #colorhslDIV, #colornamDIV {
+    font-size:18px;
+}
+#colorrgbDIV, #colorhslDIV {
+display: none;
+}
+#wronginputDIV {
+    text-align:left;
+    position:absolute;
+    margin:4px 10px;
+    color:#a94442;
+    display:none;
+}
+.has-error input{
+    border:1px solid red;
+}
+#entercolorDIV input,#entercolorDIV button{
+    height:28px;
+	display: none;
+}
+#entercolort {
+display: none;
+}
+#entercolorDIV input{
+    width:80%;
+    border:1px solid #d3d3d3;
+    border-right:none;
+}
+
+.w3-table-all td {
+    padding:4px;
+}
