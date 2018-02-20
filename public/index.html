@@ -1,30 +1,39 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>TP-Link Smart Bulb Web Control</title>
+      <title>TP-Link Smart Bulb Web Interface</title>
       <meta charset="utf-8">
 		<link rel="stylesheet" href="./files/style.css">
 		<script src="./files/color.js"></script>
         <script src="./files/jquery-3.3.1.min.js"></script>
    </head>
    <body>
-		 <!--<h2>TP-Link Smart Bulb Web Control</h2>-->
-		 <p> If you send commands too frequently, they wont work (The API will say it has worked but the bulb wont update)</p>
-         <button onclick="buttonClickedScan()">Scan for Bulbs</button>&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp; <button onclick="toggleCPicker()">Toggle Colour Picker</button>  <button onclick="toggleResponse()">Toggle Response</button><br><br>
-         Bulb IP: <input id="bip" type="text" name="bip">  <button onclick="buttonClickedOn()">On</button>  <button onclick="buttonClickedOff()">Off</button>     
-         
-         	&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;<button onclick="buttonClickedInfo()">Info</button>  <button onclick="buttonClickedCloud()">Cloud Info</button>  <button onclick="buttonClickedSchedule()">Schedule</button>  <button onclick="buttonClickedDetails()">Details</button><br><br>
-         
-		 Hex Color Value: <input type="text" name="hext" id="hext" placeholder="color value" value="#ffffff" size="8">
-		 Brightness (Between 0-100): <input type="text" name="brightt" id="brightt" value="50" size="3" maxlength="3"> Transition (in milliseconds): <input size="1" type="text" name="trans" id="trans" value="0" >
-		 <button onclick="buttonClickedHex()">Send</button> <br>
+		<!--<h2>TP-Link Smart Bulb Web Control</h2>-->
+		<p> If you send commands too frequently, they wont work (The API will say it has worked but the bulb wont update)</p>
+        <button onclick="buttonClickedScan()">Scan for Bulbs</button>&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp; <button onclick="toggleElement('cpicker')">Toggle Colour Picker</button>  <button onclick="toggleElement('responsediv')">Toggle Response</button><br><br>
+        Bulb IP: <input id="bip" type="text" name="bip">  <button onclick="buttonClickedOn()">On</button>  <button onclick="buttonClickedOff()">Off</button>     
         
+        	&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;<button onclick="buttonClickedInfo()">Info</button>  <button onclick="buttonClickedCloud()">Cloud Info</button>  <button onclick="buttonClickedSchedule()">Schedule</button>  <button onclick="buttonClickedDetails()">Details</button><br><br>
+        
+        <input type="radio" name="hueorct" value="ct" checked> Colour Temp: <input type="range" min="2500" max="6500" value="2700" class="slider" id="ctemp"> Value: <span id="ctval"></span>K<br><br>
+        <input type="radio" name="hueorct" value="hue"> Hex Color Value: <input type="text" name="hext" id="hext" placeholder="color value" value="#ffffff" size="8"><br><br>
+		
+		Brightness (Between 0-100): <input type="text" name="brightt" id="brightt" value="50" size="3" maxlength="3">&nbsp; Transition (in milliseconds): <input size="1" type="text" name="trans" id="trans" value="0" >
+        <button onclick="buttonClickedType()">Send</button> <br>
         <div id="responsediv">
         <p>Response:</p>
         <pre id="response"></pre>
         </div>
          
-		 <script>
+		<script>
+            var slider = document.getElementById("ctemp");
+            var output = document.getElementById("ctval");
+            output.innerHTML = slider.value; // Display the default slider value
+            // Update the current slider value (each time you drag the slider handle)
+            slider.oninput = function() {
+                output.innerHTML = this.value;
+            }
+            
             function syntaxHighlight(json) {
                 if (typeof json != 'string') {
                     json = JSON.stringify(json, undefined, 4);
@@ -47,23 +56,14 @@
                 });
             } 
             
-            function toggleCPicker() {
-                var x = document.getElementById("cpicker");
+            function toggleElement(element) {
+                var x = document.getElementById(element);
                 if (x.style.display === "none") {
                     x.style.display = "block";
                 } else {
                     x.style.display = "none";
                 }
             } 
-
-            function toggleResponse() {
-                var x = document.getElementById("responsediv");
-                if (x.style.display === "none") {
-                    x.style.display = "block";
-                } else {
-                    x.style.display = "none";
-                }
-            }
          
 			function buttonClickedOn(){
                 var bip = document.getElementById("bip").value;
@@ -127,7 +127,9 @@
                 });
 			 }
 			 
-			 function buttonClickedHex(){
+			 function buttonClickedType(){
+             var type = $('input[name=hueorct]:checked').val(); 
+             if (type == "hue") {
              var bip = document.getElementById("bip").value;
 			 var hext = document.getElementById("hext").value;
              var trans = document.getElementById("trans").value;
@@ -138,6 +140,17 @@
                     document.getElementById("responsediv").style.display = "block";
                     document.getElementById("response").innerHTML = syntaxHighlight(data);
                 });
+             } else if (type == "ct"){
+             var bip = document.getElementById("bip").value;
+			 var ctemp = document.getElementById("ctemp").value;
+             var trans = document.getElementById("trans").value;
+			 var bright = document.getElementById("brightt").value;
+             var aurl = "http://" + location.host + "/api?cmd=power&ip=" + bip + "&ct=" + ctemp + "&bri=" + bright + "&trans=" + trans
+			    $.get(aurl, function(data, status){
+                    document.getElementById("responsediv").style.display = "block";
+                    document.getElementById("response").innerHTML = syntaxHighlight(data);
+                });
+             }
 			 }
 
 var colorhex = "#FF0000";
