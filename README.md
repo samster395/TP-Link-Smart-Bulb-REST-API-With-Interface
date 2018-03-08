@@ -77,7 +77,7 @@ Add <code>/api?cmd=power&st=off</code> and the IP of the bulb with <code>&ip=0.0
 
 Add <code>/api?cmd=power</code> and the IP of the bulb with <code>&ip=0.0.0.0</code> to the URL
 
-Add <code>&ct=COLOUR TEMP HERE</code> to set the bulb to a specific colour temp OR add <code>&hue=HEX CODE WITHOUT #</code> to set the bulb to a specific hue
+Add <code>&ct=COLOUR TEMP HERE IN KELVIN -  JUST THE NUMBER</code> to set the bulb to a specific colour temp OR add <code>&hue=HEX CODE WITHOUT #</code> to set the bulb to a specific hue
 
 Optional parameters include:
 
