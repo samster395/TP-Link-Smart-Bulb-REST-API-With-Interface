@@ -6,19 +6,26 @@
 		<link rel="stylesheet" href="./files/style.css">
 		<script src="./files/color.js"></script>
         <script src="./files/jquery-3.3.1.min.js"></script>
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
    </head>
    <body>
 		<!--<h2>TP-Link Smart Bulb Web Control</h2>-->
 		<p> If you send commands too frequently, they wont work (The API will say it has worked but the bulb wont update)</p>
         <button onclick="buttonClickedScan()">Scan for Bulbs</button>&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;  <button onclick="toggleElement('responsediv')">Toggle Response</button><br><br>
-        Bulb IP: <input id="bip" type="text" name="bip">  <button onclick="buttonClickedOn()">On</button>  <button onclick="buttonClickedOff()">Off</button>     
+        Bulb IP: <!--<input id="bip" type="text" name="bip"> -->
+		<input id="selected" type="text" list="bulbs" name="bulb"/>
+		<datalist id="bulbs">
+		</datalist>
+
+		<button onclick="buttonClickedOn()">On</button>  <button onclick="buttonClickedOff()">Off</button>
         
-        	&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;<button onclick="buttonClickedInfo()">Info</button>  <button onclick="buttonClickedCloud()">Cloud Info</button>  <button onclick="buttonClickedSchedule()">Schedule</button>  <button onclick="buttonClickedDetails()">Details</button><br><br>
+        	&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;<button onclick="buttonClickedInfo()">Info</button>  <button onclick="buttonClickedCloud()">Cloud Info</button>  <button onclick="buttonClickedSchedule()">Schedule</button>  <!--<button onclick="buttonClickedDetails()">Details</button>--><br><br>
         
         <input type="radio" name="hueorct" value="ct" checked> Color Temp: <input type="range" min="2500" max="6500" value="2700" class="slider" id="ctemp"> Value: <input size="2" id="ctval"></input> K<br><br>
         <input type="radio" name="hueorct" value="hue"> Hex Color Value: <input type="text" name="hext" id="hext" placeholder="color value" value="#ffffff" size="8"> <button onclick="toggleElement('cpicker')">Toggle Color Picker</button><br><br>
 		
-		Brightness (Between 0-100): <input type="text" name="brightt" id="brightt" value="50" size="3" maxlength="3">&nbsp; Transition (in milliseconds): <input size="1" type="text" name="trans" id="trans" value="0" >
+		Brightness (Between 0-100): <input type="text" name="brightt" id="brightt" value="100" size="3" maxlength="3">&nbsp; Transition (in milliseconds): <input size="1" type="text" name="trans" id="trans" value="0" >
         <button onclick="buttonClickedType()">Send</button> <br>
         <div id="responsediv">
         <p>Response:</p>
@@ -37,6 +44,38 @@
 			output.oninput = function() {
                 slider.value = this.value;
             }
+			
+			$(document).ready(function() {
+
+				var data = {};
+				$("#bulbs option").each(function(i,el) {  
+				data[$(el).data("value")] = $(el).val();
+				});
+				//console.log(data, $("#bulbs option").val());
+				
+				$('input[name=bulb]').focusin(function() {
+					$('input[name=bulb]').val('');
+				});
+				
+			});
+			
+				if (localStorage['bulbs']) {
+					var bulbsL = JSON.parse(localStorage['bulbs']);
+				} else {
+					var bulbsL = [];
+				}
+				
+				var list = document.getElementById('bulbs');
+				for (var i = 0; i < bulbsL.length; i++) {
+
+				var option = document.createElement('option');
+				option.value = bulbsL[i].name;
+				option.setAttribute('data-value', bulbsL[i].ip);
+				//option.data("value") = bulbsL[i].ip;
+				list.appendChild(option);
+					//appendTaskToList(bulbsL[i].name, bulbsL[i].ip);
+				}
+
             
             function syntaxHighlight(json) {
                 if (typeof json != 'string') {
@@ -65,7 +104,13 @@
 			}
          
 			function buttonClickedOn(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
+				//alert($('#bulbs [value="' + value + '"]').data('value'));
+                //var bip = document.getElementById("bip").value;
                 var aurl = "http://" + location.host + "/api?cmd=power&ip=" + bip + "&st=on"
 			    $.get(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -74,7 +119,12 @@
 			 }
 
 			function buttonClickedOff(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
+                //var bip = document.getElementById("bip").value;
 			    var aurl = "http://" + location.host + "/api?cmd=power&ip=" + bip + "&st=off"
 			    $.get(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -86,12 +136,37 @@
                 var aurl = "http://" + location.host + "/api?cmd=scan"
 			    $.get(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
-                    document.getElementById("response").innerHTML = syntaxHighlight(data);
+					document.getElementById("response").innerHTML = "";
+					var array = JSON.parse(data);
+					var i;
+					for (i = 0; i < array.length; i++) {
+						
+						//console.log(array[i].name + " - " + array[i].ip);
+						var x = document.createElement("P");                        // Create a <p> node
+						var t = document.createTextNode(array[i].name + " - " + array[i].ip);    // Create a text node
+						x.appendChild(t);                                           // Append the text to <p>
+						x.innerHTML +=" ";
+						var button = document.createElement("button");
+						//Assign different attributes to the element. 
+						button.innerHTML = 'Add to saved';
+						//button.onclick = function(){ alert(array[i].ip);return false; };
+						button.setAttribute('onclick', 'saveBulb("'+array[i].name +'", "'+array[i].ip+'")');
+						//Append the element in page (in span).  
+						x.appendChild(button);
+						
+						document.getElementById("response").appendChild(x);
+					
+					}
+                    //document.getElementById("response").innerHTML = syntaxHighlight(data);
                 });
             }
 
             function buttonClickedInfo(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
                 var aurl = "http://" + location.host + "/api?cmd=info&ip=" + bip
 			    $.getJSON(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -100,7 +175,11 @@
 			 }            
              
             function buttonClickedCloud(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
                 var aurl = "http://" + location.host + "/api?cmd=cinfo&ip=" + bip
 			    $.getJSON(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -109,7 +188,11 @@
 			 }            
              
             function buttonClickedSchedule(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
                 var aurl = "http://" + location.host + "/api?cmd=schedule&ip=" + bip
 			    $.getJSON(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -118,7 +201,11 @@
 			 }            
              
             function buttonClickedDetails(){
-                var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
                 var aurl = "http://" + location.host + "/api?cmd=details&ip=" + bip
 			    $.getJSON(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
@@ -129,7 +216,11 @@
 			 function buttonClickedType(){
              var type = $('input[name=hueorct]:checked').val(); 
              if (type == "hue") {
-             var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
 			 var hext = document.getElementById("hext").value;
              var trans = document.getElementById("trans").value;
              hext = hext.replace('#','');
@@ -140,7 +231,11 @@
                     document.getElementById("response").innerHTML = syntaxHighlight(data);
                 });
              } else if (type == "ct"){
-             var bip = document.getElementById("bip").value;
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
 			 var ctemp = document.getElementById("ctval").value;
              var trans = document.getElementById("trans").value;
 			 var bright = document.getElementById("brightt").value;
@@ -323,6 +418,32 @@ function submitOnEnter(e) {
     if (keyboardKey == 13) {
         clickColor(0,-1,-1);
     }
+}
+
+function saveBulb(name, ip) {
+if (localStorage['bulbs']) {
+	var bulbsL2 = JSON.parse(localStorage['bulbs']);
+
+if (bulbsL2.some(bulbsL2=>bulbsL2.ip === ip)) {} else {
+            var feed = {
+                name: name,
+                ip: ip
+            };
+            bulbsL.push(feed);
+
+        localStorage.setItem("bulbs", JSON.stringify(bulbsL));
+		location.reload();
+		}
+} else {
+            var feed = {
+                name: name,
+                ip: ip
+            };
+            bulbsL.push(feed);
+
+        localStorage.setItem("bulbs", JSON.stringify(bulbsL));
+		location.reload();
+}
 }
 
 </script>
