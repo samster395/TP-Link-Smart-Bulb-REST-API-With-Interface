@@ -14,7 +14,7 @@
 		<p> If you send commands too frequently, they wont work (The API will say it has worked but the bulb wont update)</p>
         <button onclick="buttonClickedScan()">Scan for Bulbs</button>&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;  <button onclick="toggleElement('responsediv')">Toggle Response</button><br><br>
         Bulb IP (Type IP or click box for saved bulbs): <!--<input id="bip" type="text" name="bip"> -->
-		<input id="selected" type="text" list="bulbs" name="bulb"/>
+		<input id="selected" type="text" list="bulbs" name="bulb" autocomplete="off"/>
 		<datalist id="bulbs">
 		</datalist>
 
@@ -22,8 +22,9 @@
         
         	&nbsp;	&nbsp;	&nbsp;	&nbsp; &nbsp;	&nbsp;	&nbsp;	&nbsp;<button onclick="buttonClickedInfo()">Info</button>  <button onclick="buttonClickedCloud()">Cloud Info</button>  <button onclick="buttonClickedSchedule()">Schedule</button>  <!--<button onclick="buttonClickedDetails()">Details</button>--><br><br>
         
-        <input type="radio" name="hueorct" value="ct" checked> Color Temp: <input type="range" min="2500" max="6500" value="2700" class="slider" id="ctemp"> Value: <input size="2" id="ctval"></input> K<br><br>
-        <input type="radio" name="hueorct" value="hue"> Hex Color Value: <input type="text" name="hext" id="hext" placeholder="color value" value="#ffffff" size="8"> <button onclick="toggleElement('cpicker')">Toggle Color Picker</button><br><br>
+		<button onclick="buttonClickedPreset(0)">Preset 1</button> <button onclick="buttonClickedPreset(1)">Preset 2</button> <button onclick="buttonClickedPreset(2)">Preset 3</button> <button onclick="buttonClickedPreset(3)">Preset 4</button><br><br>
+        <input type="radio" name="hueorct" value="ct" id="ct" checked> Color Temp: <input type="range" min="2500" max="6500" value="2700" class="slider" id="ctemp"> Value: <input size="2" id="ctval"></input> K<br><br>
+        <input type="radio" name="hueorct" value="hue" id="hue"> Hex Color Value: <input type="text" name="hext" id="hext" placeholder="color value" value="#ffffff" size="8"> <button onclick="toggleElement('cpicker')">Toggle Color Picker</button><br><br>
 		
 		Brightness (Between 0-100): <input type="text" name="brightt" id="brightt" value="100" size="3" maxlength="3">&nbsp; Transition (in milliseconds): <input size="1" type="text" name="trans" id="trans" value="0" >
         <button onclick="buttonClickedType()">Send</button> <br>
@@ -102,6 +103,35 @@
 			function toggleElement(divId) {
 				$("#" + divId).toggle();
 			}
+			
+			function hslToHex(h, s, l) {
+				h /= 360;
+				s /= 100;
+				l /= 100;
+				let r, g, b;
+				if (s === 0) {
+					r = g = b = l; // achromatic
+				} else {
+					const hue2rgb = (p, q, t) => {
+					if (t < 0) t += 1;
+					if (t > 1) t -= 1;
+					if (t < 1 / 6) return p + (q - p) * 6 * t;
+					if (t < 1 / 2) return q;
+					if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+					return p;
+					};
+					const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+					const p = 2 * l - q;
+					r = hue2rgb(p, q, h + 1 / 3);
+					g = hue2rgb(p, q, h);
+					b = hue2rgb(p, q, h - 1 / 3);
+				}
+				const toHex = x => {
+					const hex = Math.round(x * 255).toString(16);
+					return hex.length === 1 ? '0' + hex : hex;
+				};
+				return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+			}
          
 			function buttonClickedOn(){
 				var value = $('#selected').val();
@@ -115,6 +145,40 @@
 			    $.get(aurl, function(data, status){
                     document.getElementById("responsediv").style.display = "block";
                     document.getElementById("response").innerHTML = syntaxHighlight(data);
+                });
+			 }
+			 
+			 function buttonClickedPreset(num){
+				var value = $('#selected').val();
+				var bip = $('#bulbs [value="' + value + '"]').data('value');
+				if (bip == null) { 
+					bip = $('#selected').val();
+				}
+				var bright = document.getElementById("brightt").value;
+                var aurl = "http://" + location.host + "/api?cmd=info&ip=" + bip
+			    $.get(aurl, function(data, status){
+					if (data.includes("No IP")) {
+						document.getElementById("responsediv").style.display = "block";
+						document.getElementById("response").innerHTML = syntaxHighlight(data);
+					} else {
+						var obj = JSON.parse(data);
+						document.getElementById("brightt").value = obj["preferred_state"][num]["brightness"];
+						
+						if (obj["preferred_state"][num]["color_temp"] > 0) {
+							
+							toggleElement('responsediv');
+							document.getElementById("ct").checked = true;
+							document.getElementById("ctemp").value = obj["preferred_state"][num]["color_temp"];
+							document.getElementById("ctval").value = obj["preferred_state"][num]["color_temp"];
+							
+						} else if (obj["preferred_state"][num]["hue"] > 0 || obj["preferred_state"][num]["saturation"] > 0) {
+							
+							document.getElementById("hue").checked = true;
+							document.getElementById("hext").value = hslToHex(obj["preferred_state"][num]["hue"], obj["preferred_state"][num]["saturation"], 50);
+							
+							
+						}
+					}
                 });
 			 }
 
