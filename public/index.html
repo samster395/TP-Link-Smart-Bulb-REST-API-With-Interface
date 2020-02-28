@@ -166,15 +166,19 @@
 						
 						if (obj["preferred_state"][num]["color_temp"] > 0) {
 							
-							toggleElement('responsediv');
+							document.getElementById("responsediv").style.display = "none";
 							document.getElementById("ct").checked = true;
 							document.getElementById("ctemp").value = obj["preferred_state"][num]["color_temp"];
 							document.getElementById("ctval").value = obj["preferred_state"][num]["color_temp"];
 							
 						} else if (obj["preferred_state"][num]["hue"] > 0 || obj["preferred_state"][num]["saturation"] > 0) {
-							
+							document.getElementById("responsediv").style.display = "none";
+							var hex = hslToHex(obj["preferred_state"][num]["hue"], obj["preferred_state"][num]["saturation"], 50)
 							document.getElementById("hue").checked = true;
-							document.getElementById("hext").value = hslToHex(obj["preferred_state"][num]["hue"], obj["preferred_state"][num]["saturation"], 50);
+							document.getElementById("hext").value = hex;
+							document.getElementById("html5colorpicker").value = hex;
+							document.getElementById("colorhexDIV").innerHTML = hex;
+							document.getElementById("selectedcolor").style.backgroundColor = hex;
 							
 							
 						}
@@ -311,8 +315,8 @@
              }
 			 }
 
-var colorhex = "#FF0000";
-var color = "#FF0000";
+var colorhex = "#ffffff";
+var color = "#ffffff";
 var colorObj = w3color(color);
 function mouseOverColor(hex) {
     document.getElementById("divpreview").style.visibility = "visible";
@@ -529,18 +533,18 @@ var thisleft = "135";
       <div id="wronginputDIV" style="display: none;">Wrong Input</div>
       <div id="html5DIV">
         <h3>Or Use HTML5:</h3>
-        <input type="color" id="html5colorpicker" onchange="clickColor(0, -1, -1, 5)" value="#ff0000" style="width:85%;">
+        <input type="color" id="html5colorpicker" onchange="clickColor(0, -1, -1, 5)" value="#ffffff" style="width:85%;">
       </div>   
     </div>
   </div>
 
   <div class="w3-col l4 m12" style="text-align:center;">
     <h3>Selected Color:</h3>
-    <div id="selectedcolor" class="w3-large" style="background-color: rgb(0, 204, 255);">
+    <div id="selectedcolor" class="w3-large" style="background-color: #ffffff;">
     
     </div>
     <div id="colornamDIV" class="w3-margin-top"></div>      
-    <div><b><span id="colorhexDIV">#00ccff</span></b></div>
+    <div><b><span id="colorhexDIV">#ffffff</span></b></div>
     <div id="colorrgbDIV">rgb(0, 204, 255)</div>
     <div id="colorhslDIV">hsl(192, 100%, 50%)</div> 
   </div>
