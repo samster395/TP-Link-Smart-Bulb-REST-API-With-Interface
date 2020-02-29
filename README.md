@@ -2,7 +2,7 @@
 
 A REST API to control the TP-Link Smart bulbs that also includes a web interface.
 
-I have started work on a native app for this: https://github.com/ToXIc-Dev/tp-link-smart-bulb-app
+I have also made a native app for this which includes tray shortcuts: https://github.com/ToXIc-Dev/tp-link-smart-bulb-app
 
 Here is a screen shot of the web interface, It doesn't look great but it works :)
 
