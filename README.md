@@ -2,7 +2,9 @@
 
 A REST API to control the TP-Link Smart bulbs that also includes a web interface.
 
-I have also made a standalone app for this which includes tray shortcuts: https://github.com/ToXIc-Dev/tp-link-smart-bulb-app
+I have also made a standalone app for this which includes tray shortcuts: https://github.com/samster395/tp-link-smart-bulb-app
+
+I have also made a script to comtrol the bulb according to f.lux: https://github.com/samster395/flux-tplink-smart-bulbs
 
 Here is a screen shot of the web interface, It doesn't look great but it works :)
 
